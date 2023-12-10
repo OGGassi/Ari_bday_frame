@@ -72,6 +72,12 @@
             transform: translateX(-50%);
             z-index: -1;
         }
+        #zoomSlider {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+        }
     </style>
 </head>
 <body style='margin: 0; overflow: hidden;'>
@@ -2132,26 +2138,41 @@
 
     <!-- Button to capture a photo -->
     <button id="captureButton">Take Photo</button>
+    <!-- Slider for zoom control -->
+    <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1">
 
-    <script>
-        
+<script>
+        let stream;
+        let videoTrack;
+        let zoomLevel = 1;
 
-        navigator.permissions.query({ name: 'camera' })
-.then(function(permissionStatus) {
-   console.log('camera permission state is ', permissionStatus.state);
-   permissionStatus.onchange = function() {
-      console.log('camera permission state has changed to ', this.state);
-   };
-});
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(mediaStream) {
+                stream = mediaStream;
+                videoTrack = stream.getVideoTracks()[0];
 
-navigator.mediaDevices.getUserMedia({ video: true })
-   .then(function(stream) {
-      // You have access to the camera stream here
-   })
-   .catch(function(error) {
-      console.log("Something went wrong accessing the camera:", error);
-   });
+                // Attach stream to video element if needed
+                // var videoElement = document.querySelector('video');
+                // videoElement.srcObject = stream;
 
+                // Listen to zoom slider changes
+                document.getElementById('zoomSlider').addEventListener('input', function(event) {
+                    zoomLevel = event.target.value;
+                    setZoom(zoomLevel);
+                });
+            })
+            .catch(function(error) {
+                console.log("Something went wrong accessing the camera:", error);
+            });
+
+        function setZoom(zoomLevel) {
+            if (videoTrack) {
+                let capabilities = videoTrack.getCapabilities();
+                if ('zoom' in capabilities) {
+                    videoTrack.applyConstraints({ advanced: [{ zoom: zoomLevel }] });
+                }
+            }
+        }
 
         document.getElementById('captureButton').addEventListener('click', function() {
             var scene = document.querySelector('a-scene');
