@@ -78,6 +78,19 @@
             right: 20px;
             z-index: 999;
         }
+
+        #cameraSwitch {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 999;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body style='margin: 0; overflow: hidden;'>
@@ -2140,47 +2153,41 @@
     <button id="captureButton">Take Photo</button>
     <!-- Slider for zoom control -->
     <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1">
+        <!-- Button to switch camera -->
+        <button id="cameraSwitch">Switch Camera</button>
 
-<script>
-        let stream;
-        let videoTrack;
-        let zoomLevel = 1;
-
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function(mediaStream) {
-                stream = mediaStream;
-                videoTrack = stream.getVideoTracks()[0];
-
-                // Attach stream to video element if needed
-                // var videoElement = document.querySelector('video');
-                // videoElement.srcObject = stream;
-
-                // Listen to zoom slider changes
-                document.getElementById('zoomSlider').addEventListener('input', function(event) {
-                    zoomLevel = event.target.value;
-                    setZoom(zoomLevel);
-                });
-            })
-            .catch(function(error) {
-                console.log("Something went wrong accessing the camera:", error);
-            });
-
-        function setZoom(zoomLevel) {
-            if (videoTrack) {
-                let capabilities = videoTrack.getCapabilities();
-                if ('zoom' in capabilities) {
-                    videoTrack.applyConstraints({ advanced: [{ zoom: zoomLevel }] });
+        <script>
+            let videoTrack;
+            let currentCamera = 'environment'; // Default to back camera
+    
+            async function setupCamera() {
+                try {
+                    const constraints = {
+                        video: { facingMode: currentCamera }
+                    };
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    document.querySelector('a-scene').setAttribute('arjs', 'sourceType: webcam;');
+    
+                    videoTrack = stream.getVideoTracks()[0];
+                } catch (error) {
+                    console.log("Error accessing the camera:", error);
                 }
             }
-        }
-
-        document.getElementById('captureButton').addEventListener('click', function() {
-            var scene = document.querySelector('a-scene');
-            if (scene) {
-                // Use A-Frame's built-in `.screenshot` method to capture the scene
-                scene.components.screenshot.capture('perspective');
-            }
-        });
-    </script>
+    
+            document.getElementById('cameraSwitch').addEventListener('click', function() {
+                // Switch the camera mode
+                currentCamera = (currentCamera === 'environment') ? 'user' : 'environment';
+                setupCamera(); // Re-initialize the camera with the new setting
+            });
+    
+            document.getElementById('captureButton').addEventListener('click', function() {
+                var scene = document.querySelector('a-scene');
+                if (scene) {
+                    scene.components.screenshot.capture('perspective');
+                }
+            });
+    
+            setupCamera(); // Initial camera setup
+        </script>
 </body>
 </html>
