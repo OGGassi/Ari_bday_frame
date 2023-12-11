@@ -1,6 +1,9 @@
 body {
+    margin: 0;
+    overflow: hidden;
     font-family: 'Comic Sans MS', 'Comic Sans', cursive; /* Fun, kid-friendly font */
     background-color: #f0f8ff; /* Light and cheerful background color */
+    
 }
 
 #captureButton, #cameraSwitch {
@@ -71,10 +74,30 @@ body {
     bottom: 100px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 999;
+    z-index: 998;
 }
 
 .train img {
     max-width: 100%;
     height: auto; /* Adjust the size of the SVG image */
 }
+
+/* Responsive button styling */
+button {
+    padding: 10px 15px;
+    font-size: 16px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  /* Media query for smaller screens */
+  @media (max-width: 600px) {
+    button {
+      padding: 15px 20px;
+      font-size: 18px;
+    }
+  
+    /* Adjust other elements for small screens */
+  }
